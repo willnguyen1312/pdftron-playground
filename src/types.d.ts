@@ -40765,19 +40765,19 @@ declare namespace PDFNet {
         }
     }
     namespace TextSearch {
-        /**
-         * @enum {number}
-         * @name ResultCode
-         * @memberof PDFNet.TextSearch
-         */
         enum ResultCode {
+            e_done,
+            e_page,
+            e_found
         }
-        /**
-         * @enum {number}
-         * @name Mode
-         * @memberof PDFNet.TextSearch
-         */
         enum Mode {
+            e_reg_expression,
+            e_case_sensitive,
+            e_whole_word,
+            e_search_up,
+            e_page_stop,
+            e_highlight,
+            e_ambient_string
         }
     }
     namespace Obj {
