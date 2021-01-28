@@ -1,4 +1,4 @@
-import { CoreControls } from "@pdftron/webviewer";
+import { CoreControls, Tools } from "@pdftron/webviewer";
 import React, { useRef, useEffect, useState } from "react";
 import SearchContainer from "./components/SearchContainer";
 import { ReactComponent as ZoomIn } from "./assets/icons/ic_zoom_in_black_24px.svg";
@@ -17,7 +17,10 @@ const App = () => {
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const [docViewer, setDocViewer] = useState<CoreControls.DocumentViewer>();
-  const [annotManager, setAnnotManager] = useState(null);
+  const [
+    annotManager,
+    setAnnotManager,
+  ] = useState<CoreControls.AnnotationManager>();
   const [searchContainerOpen, setSearchContainerOpen] = useState(false);
 
   const Annotations = window.Annotations;
@@ -64,6 +67,35 @@ const App = () => {
     }
   };
 
+  const general = async () => {
+    if (annotManager) {
+      const redactAnnot1 = new Annotations.RedactionAnnotation({
+        PageNumber: 1,
+        Rect: new Annotations.Rect(100, 100, 300, 200), // Rect are in the form x1,y1,x2,y2
+        StrokeColor: new Annotations.Color(255, 255, 255, 1),
+        FillColor: new Annotations.Color(255, 255, 255, 1),
+      });
+
+      const redactAnnot2 = new Annotations.RedactionAnnotation({
+        PageNumber: 1,
+        StrokeColor: new Annotations.Color(0, 255, 0, 1),
+        FillColor: new Annotations.Color(255, 255, 255, 1),
+        Quads: [
+          // Quads are in the form x1,y1,x2,y2,x3,y3,x4,y4
+          new Annotations.Quad(100, 290, 300, 210, 300, 210, 100, 290),
+          new Annotations.Quad(100, 390, 300, 310, 300, 310, 100, 390),
+        ],
+      });
+
+      const redactAnnotations = [redactAnnot1, redactAnnot2];
+
+      annotManager.addAnnotations(redactAnnotations as any);
+
+      // need to draw the annotations otherwise they won't show up until the page is refreshed
+      annotManager.drawAnnotationsFromList(redactAnnotations as any);
+    }
+  };
+
   const selectTool = () => {
     if (docViewer) {
       docViewer.setToolMode(docViewer.getTool("AnnotationEdit"));
@@ -72,7 +104,7 @@ const App = () => {
 
   const createRedaction = () => {
     if (docViewer) {
-      docViewer.setToolMode(docViewer.getTool("AnnotationCreateRedaction"));
+      docViewer.setToolMode(docViewer.getTool(Tools.ToolNames.RECTANGLE));
     }
   };
 
@@ -88,6 +120,7 @@ const App = () => {
     <div className="App">
       <div id="main-column">
         <div className="center" id="tools">
+          <button onClick={general}>General</button>
           <button onClick={zoomOut}>
             <ZoomOut />
           </button>
