@@ -104,7 +104,7 @@ const App = () => {
 
   const createRedaction = () => {
     if (docViewer) {
-      docViewer.setToolMode(docViewer.getTool(Tools.ToolNames.RECTANGLE));
+      docViewer.setToolMode(docViewer.getTool(""));
     }
   };
 
