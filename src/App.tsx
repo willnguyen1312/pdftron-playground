@@ -1,4 +1,4 @@
-import { CoreControls, Tools } from "@pdftron/webviewer";
+import { CoreControls } from "@pdftron/webviewer";
 import React, { useRef, useEffect, useState } from "react";
 import SearchContainer from "./components/SearchContainer";
 import { ReactComponent as ZoomIn } from "./assets/icons/ic_zoom_in_black_24px.svg";
@@ -82,7 +82,7 @@ const App = () => {
         FillColor: new Annotations.Color(255, 255, 255, 1),
         Quads: [
           // Quads are in the form x1,y1,x2,y2,x3,y3,x4,y4
-          new Annotations.Quad(100, 290, 300, 210, 300, 210, 100, 290),
+          new (Annotations as any).Quad(100, 290, 300, 210, 300, 210, 100, 290),
           new (Annotations as any).Quad(100, 390, 300, 310, 300, 310, 100, 390),
         ],
       });
