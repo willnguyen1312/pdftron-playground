@@ -11,8 +11,8 @@ import { ToolStyles, SearchResult, AnnotationAction } from "./types";
 import { DEFAULT_TOOLSTYLES, TOOLMODES_STYLES, Toolnames } from "./constants";
 import { buildSearchModeFlag } from "./helpers";
 
-CoreControls.setWorkerPath("/webviewer");
-CoreControls.enableFullPDF(true);
+window.CoreControls.setWorkerPath("/webviewer");
+window.CoreControls.enableFullPDF(true);
 
 interface DocumentProviderProps {
   fileUrl: string;
@@ -31,6 +31,7 @@ export const DocumentProvider: FC<DocumentProviderProps> = ({
   const docViewerRef = useRef<CoreControls.DocumentViewer>(
     new window.CoreControls.DocumentViewer()
   );
+
   const annotationManagerRef = useRef<CoreControls.AnnotationManager>(
     docViewerRef.current.getAnnotationManager()
   );
@@ -89,14 +90,14 @@ export const DocumentProvider: FC<DocumentProviderProps> = ({
   useEffect(() => {
     // Docviewer
     docViewerRef.current.on("documentLoaded", () => {
-      dispatch({
-        type: "setViewerDocumentheight",
-        value: docViewerRef.current.getViewerElement().scrollHeight,
-      });
-      dispatch({
-        type: "setViewerDocumentContainerHeight",
-        value: docViewerRef.current.getScrollViewElement().clientHeight,
-      });
+      // dispatch({
+      //   type: "setViewerDocumentheight",
+      //   value: docViewerRef.current.getViewerElement().scrollHeight,
+      // });
+      // dispatch({
+      //   type: "setViewerDocumentContainerHeight",
+      //   value: docViewerRef.current.getScrollViewElement().clientHeight,
+      // });
     });
 
     docViewerRef.current.on("toolModeUpdated", (tool) => {
@@ -161,14 +162,14 @@ export const DocumentProvider: FC<DocumentProviderProps> = ({
   useEffect(() => {
     docViewerRef.current.setOptions({ enableAnnotations: true });
     setToolMode(Toolnames.AnnotationEdit);
-    TOOLMODES_STYLES.forEach((toolMode) => {
+    TOOLMODES_STYLES.map((toolMode) => {
       const defaultStyles = DEFAULT_TOOLSTYLES[toolMode];
       setToolStyles({
         toolMode,
         toolStyles: defaultStyles,
       });
     });
-  }, [setToolStyles, setToolMode]);
+  }, [, setToolStyles, setToolMode]);
 
   // Load PDF Evidence
   useEffect(() => {
