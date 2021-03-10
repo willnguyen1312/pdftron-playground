@@ -1,5 +1,5 @@
 import { CoreControls } from "@pdftron/webviewer";
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import SearchContainer from "./components/SearchContainer";
 import { ReactComponent as ZoomIn } from "./assets/icons/ic_zoom_in_black_24px.svg";
 import { ReactComponent as ZoomOut } from "./assets/icons/ic_zoom_out_black_24px.svg";
@@ -31,7 +31,7 @@ const App = () => {
       return;
     }
     const CoreControls = window.CoreControls;
-    CoreControls.setWorkerPath("/webviewer");
+    CoreControls.setWorkerPath("/webviewer/7.3.0");
     CoreControls.enableFullPDF(true);
 
     const docViewer = new CoreControls.DocumentViewer();
