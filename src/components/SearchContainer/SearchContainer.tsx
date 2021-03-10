@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import ClearSearch from '../../assets/icons/ic_close_black_24px.svg'
-import LeftChevronArrow from '../../assets/icons/ic_chevron_left_black_24px.svg'
-import RightChevronArrow from '../../assets/icons/ic_chevron_right_black_24px.svg'
-import Search from '../../assets/icons/ic_search_black_24px.svg'
-import './SearchContainer.css';
+import { produce } from "immer";
+import React, { useState, useEffect } from "react";
+import ClearSearch from "../../assets/icons/ic_close_black_24px.svg";
+import LeftChevronArrow from "../../assets/icons/ic_chevron_left_black_24px.svg";
+import RightChevronArrow from "../../assets/icons/ic_chevron_right_black_24px.svg";
+import Search from "../../assets/icons/ic_search_black_24px.svg";
+import "./SearchContainer.css";
 
 const SearchContainer = (props) => {
   const [searchResults, setSearchResults] = useState<any>([]);
@@ -33,15 +34,20 @@ const SearchContainer = (props) => {
           e_ambient_string: eAmbientString,
         },
       } = docViewer;
-      setSearchModes({
-        ePageStop,
-        eHighlight,
-        eCaseSensitive,
-        eWholeWord,
-        eAmbientString,
-      });
+      setSearchModes(
+        produce(searchModes, (prevSearchModes) => {
+          prevSearchModes = {
+            ePageStop,
+            eHighlight,
+            eCaseSensitive,
+            eWholeWord,
+            eAmbientString,
+          };
+          console.log(prevSearchModes);
+        })
+      );
     }
-  }, [ docViewer ]);
+  }, [docViewer, searchModes]);
 
   /**
    * Coupled with the function `changeActiveSearchResult`
@@ -50,7 +56,7 @@ const SearchContainer = (props) => {
     if (activeResultIndex >= 0 && activeResultIndex < searchResults.length) {
       docViewer.setActiveSearchResult(searchResults[activeResultIndex]);
     }
-  }, [ activeResultIndex, docViewer, searchResults ]);
+  }, [activeResultIndex, docViewer, searchResults]);
 
   /**
    * Side-effect function that invokes `docViewer.textSearchInit`, and stores
@@ -60,34 +66,30 @@ const SearchContainer = (props) => {
   const performSearch = () => {
     clearSearchResults(false);
     const {
-      current: {
-        value: textToSearch
-      }
+      current: { value: textToSearch },
     } = searchTerm;
-    const {
-      ePageStop,
-      eHighlight,
-      eAmbientString,
-    } = searchModes;
+    const { ePageStop, eHighlight, eAmbientString } = searchModes;
     const mode = toggledSearchModes.reduce(
       (prev, value) => prev | value,
-      (ePageStop | eHighlight | eAmbientString),
+      ePageStop | eHighlight | eAmbientString
     );
     const fullSearch = true;
     let jumped = false;
     docViewer.textSearchInit(textToSearch, mode, {
       fullSearch,
-      onResult: result => {
-        setSearchResults(prevState => [...prevState, result]);
+      onResult: (result) => {
+        setSearchResults(
+          produce(searchResults, (prevState) => {
+            prevState.push(result);
+          })
+        );
         const {
           resultCode,
           quads,
           // The page number in the callback parameter is 0-indexed
           page_num: zeroIndexedPageNum,
         } = result;
-        const {
-          e_found: eFound,
-        } = window.PDFNet.TextSearch.ResultCode
+        const { e_found: eFound } = window.PDFNet.TextSearch.ResultCode;
         const pageNumber = zeroIndexedPageNum + 1;
         if (resultCode === eFound) {
           const highlight = new Annotations.TextHighlightAnnotation();
@@ -96,7 +98,7 @@ const SearchContainer = (props) => {
            * 0-indexed
            */
           highlight.setPageNumber(pageNumber);
-          highlight.Quads.push(quads[0].getPoints());
+          highlight.Quads.push(quads[0]?.getPoints());
           annotManager.addAnnotation(highlight);
           annotManager.drawAnnotations(highlight.PageNumber);
           if (!jumped) {
@@ -112,7 +114,7 @@ const SearchContainer = (props) => {
             });
           }
         }
-      }
+      },
     });
   };
 
@@ -127,7 +129,7 @@ const SearchContainer = (props) => {
    */
   const clearSearchResults = (clearSearchTermValue = true) => {
     if (clearSearchTermValue) {
-      searchTerm.current.value = '';
+      searchTerm.current.value = "";
     }
     docViewer.clearSearchResults();
     annotManager.deleteAnnotations(annotManager.getAnnotationsList());
@@ -144,9 +146,7 @@ const SearchContainer = (props) => {
    * `onKeyUp`
    */
   const listenForEnter = (event) => {
-    const {
-      keyCode,
-    } = event;
+    const { keyCode } = event;
     // The key code for the enter button
     if (keyCode === 13) {
       // Cancel the default action, if needed
@@ -185,54 +185,53 @@ const SearchContainer = (props) => {
    */
   const toggleSearchMode = (searchMode) => {
     if (!toggledSearchModes.includes(searchMode)) {
-      setToggledSearchModes(prevState => [...prevState, searchMode])
+      setToggledSearchModes(
+        produce(toggledSearchModes, (prevState) => {
+          prevState.push(searchMode);
+        })
+      );
     } else {
       setToggledSearchModes(
-        prevState => prevState.filter(value => value !== searchMode)
-      )
+        produce(toggledSearchModes, (prevState) => {
+          prevState = prevState.filter((value) => value !== searchMode);
+        })
+      );
     }
-  }
+  };
 
   /**
    * Side-effect function that toggles whether or not to perform a text search
    * with case sensitivty
    */
   const toggleCaseSensitive = () => {
-    const {
-      eCaseSensitive,
-    } = searchModes;
+    const { eCaseSensitive } = searchModes;
     toggleSearchMode(eCaseSensitive);
-  }
+  };
 
   /**
    * Side-effect function that toggles whether or not to perform a text search
    * that finds the whole word
    */
   const toggleWholeWord = () => {
-    const {
-      eWholeWord,
-    } = searchModes;
+    const { eWholeWord } = searchModes;
     toggleSearchMode(eWholeWord);
-  }
+  };
 
   if (!open) {
-    return (null);
+    return null;
   }
 
   return (
-    <span
-      id="search-container"
-      ref={searchContainerRef}
-    >
+    <span id="search-container" ref={searchContainerRef}>
       <div id="search-input">
         <input
           ref={searchTerm}
-          type={'text'}
-          placeholder={'Search'}
+          type={"text"}
+          placeholder={"Search"}
           onKeyUp={listenForEnter}
         />
         <button onClick={performSearch}>
-          <img src={Search} alt="Search"/>
+          <img src={Search} alt="Search" />
         </button>
       </div>
       <div>
@@ -254,65 +253,64 @@ const SearchContainer = (props) => {
         </span>
       </div>
       <div className="divider"></div>
-      <div id='search-buttons'>
+      <div id="search-buttons">
         <span>
           <button onClick={() => clearSearchResults()}>
-            <img src={ClearSearch} alt="Clear Search"/>
+            <img src={ClearSearch} alt="Clear Search" />
           </button>
         </span>
         <span id="search-iterators">
           <button
-            onClick={() => { changeActiveSearchResult(activeResultIndex - 1); }}
+            onClick={() => {
+              changeActiveSearchResult(activeResultIndex - 1);
+            }}
             disabled={activeResultIndex < 0}
           >
-            <img src={LeftChevronArrow} alt="Previous Search Result"/>
+            <img src={LeftChevronArrow} alt="Previous Search Result" />
           </button>
           <button
-            onClick={() => { changeActiveSearchResult(activeResultIndex + 1); }}
+            onClick={() => {
+              changeActiveSearchResult(activeResultIndex + 1);
+            }}
             disabled={activeResultIndex < 0}
           >
-            <img src={RightChevronArrow} alt="Next Search Result"/>
+            <img src={RightChevronArrow} alt="Next Search Result" />
           </button>
         </span>
       </div>
       <div>
-        {
-          searchResults.map((result, idx) => {
-            const {
-              ambient_str: ambientStr,
-              // page_num is 0-indexed
-              page_num: pageNum,
-              result_str_start: resultStrStart,
-              result_str_end: resultStrEnd,
-            } = result;
-            const textBeforeSearchValue = ambientStr.slice(0, resultStrStart);
-            const searchValue = ambientStr.slice(
-              resultStrStart,
-              resultStrEnd,
-            );
-            const textAfterSearchValue = ambientStr.slice(resultStrEnd);
-            let pageHeader: React.ReactNode = null;
-            if (!pageRenderTracker[pageNum]) {
-              pageRenderTracker[pageNum] = true;
-              pageHeader = <div>Page {pageNum + 1}</div>
-            }
-            return (
-              <div key={`search-result-${idx}`} >
-                {pageHeader}
-                <div
-                  className='search-result'
-                  onClick={() => {docViewer.setActiveSearchResult(result)}}
-                >
-                  {textBeforeSearchValue}
-                  <span className="search-value">
-                    {searchValue}
-                  </span>
-                  {textAfterSearchValue}
-                </div>
+        {searchResults.map((result, idx) => {
+          const {
+            ambient_str: ambientStr,
+            // page_num is 0-indexed
+            page_num: pageNum,
+            result_str_start: resultStrStart,
+            result_str_end: resultStrEnd,
+          } = result;
+          const textBeforeSearchValue = ambientStr.slice(0, resultStrStart);
+          const searchValue = ambientStr.slice(resultStrStart, resultStrEnd);
+          const textAfterSearchValue = ambientStr.slice(resultStrEnd);
+          let pageHeader: React.ReactNode = null;
+          if (!pageRenderTracker[pageNum]) {
+            pageRenderTracker[pageNum] = true;
+            pageHeader = <div>Page {pageNum + 1}</div>;
+          }
+          return (
+            <div key={`search-result-${idx}`}>
+              {pageHeader}
+              <div
+                className="search-result"
+                onClick={() => {
+                  docViewer.setActiveSearchResult(result);
+                }}
+              >
+                {textBeforeSearchValue}
+                <span className="search-value">{searchValue}</span>
+                {textAfterSearchValue}
               </div>
-            )
-          })
-        }
+            </div>
+          );
+        })}
       </div>
     </span>
   );
