@@ -35,7 +35,6 @@ const App = () => {
     CoreControls.enableFullPDF(true);
 
     const docViewer = new CoreControls.DocumentViewer();
-    (window as any).docViewer = docViewer;
     docViewer.setScrollViewElement(scrollView.current);
     docViewer.setViewerElement(viewer.current);
     docViewer.setOptions({ enableAnnotations: true });
