@@ -69,12 +69,12 @@ const App = () => {
 
   const general = async () => {
     if (annotManager) {
-      // const redactAnnot1 = new Annotations.RedactionAnnotation({
-      //   PageNumber: 1,
-      //   Rect: new (Annotations as any).Rect(100, 100, 300, 200), // Rect are in the form x1,y1,x2,y2
-      //   StrokeColor: new Annotations.Color(255, 255, 255, 1),
-      //   FillColor: new Annotations.Color(255, 255, 255, 1),
-      // });
+      const redactAnnot1 = new Annotations.RedactionAnnotation({
+        PageNumber: 1,
+        Rect: new (Annotations as any).Rect(100, 100, 300, 200), // Rect are in the form x1,y1,x2,y2
+        StrokeColor: new Annotations.Color(255, 255, 255, 1),
+        FillColor: new Annotations.Color(255, 255, 255, 1),
+      });
 
       const redactAnnot2 = new Annotations.RedactionAnnotation({
         PageNumber: 1,
@@ -87,7 +87,7 @@ const App = () => {
         ],
       });
 
-      const redactAnnotations = [redactAnnot2];
+      const redactAnnotations = [redactAnnot1, redactAnnot2];
 
       annotManager.addAnnotations(redactAnnotations as any);
 
